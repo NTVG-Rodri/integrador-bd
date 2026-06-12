@@ -1,29 +1,19 @@
-version: '3.8'
-
 services:
   # Entorno de programación
   jupyter:
-    image: jupyter/minimal-notebook:python-3.10
-    container_name: biblioia_notebook
-    restart: always
-    user: root
+    build: .
     ports:
       - "8888:8888"
     environment:
       - JUPYTER_TOKEN=utn2026
     volumes:
       - .:/home/jovyan/work
-    command: >
-      bash -c "pip install --no-cache-dir mysql-connector-python python-dotenv openai pandas tabulate && 
-      start-notebook.sh --NotebookApp.token='utn2026'"
     depends_on:
       - ollama
 
   # Motor de IA Local
   ollama:
     image: ollama/ollama:latest
-    container_name: biblioia_ollama
-    restart: always
     ports:
       - "11434:11434"
     volumes:
