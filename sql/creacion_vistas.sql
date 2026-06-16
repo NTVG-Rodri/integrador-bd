@@ -95,3 +95,66 @@ where
 	and s.activo = true
 order by
 	dias_atraso desc;
+
+
+-- Préstamos activos por socio
+-- create view vista_prestamos_activos_socio as
+select
+	id_socio,
+	socio,
+	count(*) as prestamos_activos
+from
+	vista_prestamos_activos
+group by
+	id_socio,
+	socio;
+
+
+-- Catálogo de libros
+-- create view vista_libros as
+SELECT
+	l.isbn,
+	l.titulo,
+	GROUP_CONCAT(DISTINCT CONCAT(a.nombre, ' ', a.apellido) SEPARATOR ', ') AS autores,
+	l.edicion,
+	e.nombre AS editorial,
+	GROUP_CONCAT(DISTINCT g.nombre SEPARATOR ', ') AS generos,
+	l.anio_publicacion as "año publicación",
+	l.stock_disponible,
+	l.stock_total
+FROM
+	libro l
+INNER JOIN editorial e ON
+	l.id_editorial = e.id_editorial
+LEFT JOIN libroAutor la ON
+	l.isbn = la.isbn
+LEFT JOIN autor a ON
+	la.id_autor = a.id_autor
+LEFT JOIN generoLibro gl ON
+	l.isbn = gl.isbn
+LEFT JOIN genero g ON
+	gl.id_genero = g.id_genero
+GROUP BY
+	l.isbn;
+
+
+-- Libros más prestados
+-- create view vista_libros_populares as
+SELECT 
+    l.isbn,
+    l.titulo,
+    l.autores, 
+    l.edicion, 
+    l.editorial, 
+    COUNT(p.id_prestamo) AS total_prestamos
+FROM vista_libros l
+JOIN ejemplar ej ON l.isbn = ej.isbn
+JOIN prestamo p ON ej.id_ejemplar=p.id_ejemplar
+GROUP BY 
+  	l.isbn, 
+  	l.titulo,
+  	l.autores, 
+	l.edicion, 
+	l.editorial
+order by total_prestamos desc;
+
