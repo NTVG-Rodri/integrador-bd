@@ -158,3 +158,33 @@ GROUP BY
 	l.editorial
 order by total_prestamos desc;
 
+
+-- Autores más leídos
+-- create view vista_autores_populares as
+select 
+  	a.id_autor,
+	concat(a.nombre, ' ', a.apellido) as autor,
+  	count(*) as total_prestamos,
+  	count(distinct p.id_socio) as lectores_unicos
+from autor a
+join libroAutor la on a.id_autor=la.id_autor 
+join libro l on la.isbn=l.isbn
+join ejemplar e on l.isbn=e.isbn 
+join prestamo p on e.id_ejemplar=p.id_ejemplar
+group by a.id_autor, autor
+order by total_prestamos desc;
+
+
+-- Socios con sanciones activas
+-- create view vista_sanciones_activas as
+select 
+	sa.id_socio, 
+	concat(so.nombre, ' ', so.apellido) as socio,
+	sa.fecha_inicio, 
+	sa.fecha_fin,
+	ts.nombre as tipo_sancion
+from sancion sa 
+join socio so on sa.id_socio=so.id_socio 
+join tipoSancion ts on sa.id_tipoSancion=ts.id_tipoSancion
+where fecha_fin>curdate();
+
