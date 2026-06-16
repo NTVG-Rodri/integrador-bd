@@ -111,7 +111,7 @@ group by
 
 
 -- Catálogo de libros
--- create view vista_libros as
+-- create view vista_catalogo_libros as
 SELECT
 	l.isbn,
 	l.titulo,
