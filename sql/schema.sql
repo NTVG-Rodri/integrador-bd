@@ -125,3 +125,17 @@ create table prestamo (
         or fecha_devolucion > fecha_prestamo
     )
 );
+
+CREATE TABLE IF NOT EXISTS auditoria_prestamos (
+    id_auditoria INT AUTO_INCREMENT PRIMARY KEY,
+    id_prestamo INT,
+    accion VARCHAR(10),            -- 'INSERT', 'UPDATE' o 'DELETE'
+    id_socio_anterior INT,
+    id_socio_nuevo INT,
+    id_ejemplar_anterior INT,
+    id_ejemplar_nuevo INT,
+    estado_anterior INT,
+    estado_nuevo INT,
+    usuario_bd VARCHAR(100),      
+    fecha_auditoria TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+);
