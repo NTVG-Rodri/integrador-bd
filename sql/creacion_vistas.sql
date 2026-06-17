@@ -1,5 +1,5 @@
 -- socios activos
--- create view vista_socios_activos as
+create view vista_socios_activos as
 select
 	s.id_socio,
 	concat(s.nombre, ' ', s.apellido) as socio,
@@ -18,7 +18,7 @@ where
 
 
 -- préstamos activos, ordenados por días restantes (próximos a vencer primero)
--- create view vista_prestamos_activos as
+create view vista_prestamos_activos as
 select 
 	s.id_socio, 
 	concat(s.nombre, ' ', s.apellido) as socio,
@@ -57,7 +57,7 @@ order by
 
 
 -- préstamos vencidos
--- create view vista_prestamos_vencidos as 
+create view vista_prestamos_vencidos as 
 select 
 	s.id_socio, 
 	concat(s.nombre, ' ', s.apellido) as socio,
@@ -98,7 +98,7 @@ order by
 
 
 -- Préstamos activos por socio
--- create view vista_prestamos_activos_socio as
+create view vista_prestamos_activos_socio as
 select
 	id_socio,
 	socio,
@@ -111,7 +111,7 @@ group by
 
 
 -- Catálogo de libros
--- create view vista_catalogo_libros as
+create view vista_catalogo_libros as
 SELECT
 	l.isbn,
 	l.titulo,
@@ -139,7 +139,7 @@ GROUP BY
 
 
 -- Libros más prestados
--- create view vista_libros_populares as
+create view vista_libros_populares as
 SELECT 
     l.isbn,
     l.titulo,
@@ -147,7 +147,7 @@ SELECT
     l.edicion, 
     l.editorial, 
     COUNT(p.id_prestamo) AS total_prestamos
-FROM vista_libros l
+FROM vista_catalogo_libros l
 JOIN ejemplar ej ON l.isbn = ej.isbn
 JOIN prestamo p ON ej.id_ejemplar=p.id_ejemplar
 GROUP BY 
@@ -160,7 +160,7 @@ order by total_prestamos desc;
 
 
 -- Autores más leídos
--- create view vista_autores_populares as
+create view vista_autores_populares as
 select 
   	a.id_autor,
 	concat(a.nombre, ' ', a.apellido) as autor,
@@ -176,7 +176,7 @@ order by total_prestamos desc;
 
 
 -- Socios con sanciones activas
--- create view vista_sanciones_activas as
+create view vista_sanciones_activas as
 select 
 	sa.id_socio, 
 	concat(so.nombre, ' ', so.apellido) as socio,
