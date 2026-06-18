@@ -5,19 +5,35 @@ services:
     ports:
       - "8888:8888"
     environment:
-      - JUPYTER_TOKEN=utn2026
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL}
     volumes:
       - .:/home/jovyan/work
     depends_on:
       - ollama
 
-  # Motor de IA Local
+  # Servidor Ollama
   ollama:
     image: ollama/ollama:latest
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+
+  # Descarga automática del modelo
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      - ollama
+    entrypoint: >
+      sh -c "
+      sleep 15 &&
+      ollama pull qwen3:8b
+      "
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: "no"
 
 volumes:
   ollama_data:
