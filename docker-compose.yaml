@@ -18,6 +18,7 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+    gpus: all
 
 volumes:
   ollama_data:
