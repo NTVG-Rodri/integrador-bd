@@ -3,13 +3,13 @@ import requests
 import pandas as pd
 import json
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
-import sys
-sys.path.append("/home/jovyan/work/src")
-import conexion
+from IPython.display import display
+
 
 # Cargar las variables de entorno del archivo .env
 load_dotenv("/home/jovyan/work/.env")
+
+from src.conexion import engine
 
 # Modelo
 llm_url = os.getenv("OLLAMA_URL")
@@ -90,6 +90,48 @@ def preguntar_al_agente(pregunta):
         print("\n")
         
         print("Conectando a la base de datos...")
+        import re
+
+
+        VISTAS_PERMITIDAS = {
+            "vista_catalogo_libros",
+            "vista_libros_populares",
+            "vista_socios_activos",
+            "vista_prestamos_activos",
+            "vista_prestamos_vencidos"
+        }
+
+        TABLAS_PERMITIDAS = {
+            "autor",
+            "descripcion",
+            "editorial",
+            "ejemplar",
+            "estadoFisico",
+            "estadoPrestamo",
+            "genero",
+            "generoLibro",
+            "libro",
+            "libroAutor",
+            "nacionalidad",
+            "prestamo",
+            "sancion",
+            "socio",
+            "tipoSancion",
+            "tipoSocio"
+        }
+
+        objetos = re.findall(
+            r"(?:FROM|JOIN)\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+            sql,
+            re.IGNORECASE
+        )
+
+        for obj in objetos:
+            if obj not in VISTAS_PERMITIDAS and obj not in TABLAS_PERMITIDAS:
+                raise Exception(
+                f"El modelo intentó usar un objeto inexistente: {obj}"
+                )
+                
         df_resultado = ejecutar_consulta(sql)
 
         print("Resultado:")

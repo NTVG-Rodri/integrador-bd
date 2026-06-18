@@ -2,5 +2,7 @@ mysql-connector-python
 python-dotenv
 pandas
 tabulate
-requests
 import-ipynb
+sqlalchemy
+requests
+IPython
