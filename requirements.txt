@@ -3,3 +3,4 @@ python-dotenv
 pandas
 tabulate
 requests
+import-ipynb
