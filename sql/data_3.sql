@@ -1,5 +1,3 @@
-USE biblioia;
-
 -- 1. TABLAS MAESTRAS SIMPLES
 INSERT INTO editorial (nombre) VALUES 
 ('Planeta'), ('Penguin Random House'), ('Anagrama'), ('Alfaguara'), ('Siglo XXI'), ('Minotauro'), ('Alianza'), ('Tusquets');
