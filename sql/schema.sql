@@ -8,7 +8,7 @@ create table estadoPrestamo (
     nombre varchar(100) NOT NULL
 );
 
-create table descripcion (
+create table descripcionSancion (
     id_descripcion int primary key auto_increment,
     nombre varchar(100) NOT NULL
 );
@@ -79,7 +79,7 @@ create table socio (
     apellido varchar(100) NOT NULL,
     email varchar(150) unique key NOT NULL,
     fecha_alta date NOT NULL,
-    activo boolean default true,
+    fecha_baja date NULL,
     id_nacionalidad int,
     id_tipoSocio int,
     foreign key (id_tipoSocio) references tipoSocio(id_tipoSocio),

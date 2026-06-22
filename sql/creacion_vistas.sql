@@ -14,7 +14,7 @@ join nacionalidad n on
 join tipoSocio ts on
 	s.id_tipoSocio = ts.id_tipoSocio
 where
-	s.activo = false;
+	s.fecha_baja is null;
 
 
 -- préstamos activos, ordenados por días restantes (próximos a vencer primero)
@@ -53,7 +53,7 @@ join editorial e on
 where
 	p.fecha_devolucion is null
 order by
-	dias_restantes desc;
+	dias_restantes asc;
 
 
 -- préstamos vencidos
@@ -92,9 +92,9 @@ join editorial e on
 where
 	p.fecha_devolucion is null
 	and p.fecha_vencimiento<curdate()
-	and s.activo = true
+	and s.fecha_baja is null
 order by
-	dias_atraso desc;
+	dias_atraso asc;
 
 
 -- Préstamos activos por socio
