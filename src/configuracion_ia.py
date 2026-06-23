@@ -52,7 +52,7 @@ def text_to_sql(pregunta_usuario):
         model=llm_model,
         messages=messages,
         temperature=0,
-        max_tokens=300
+        max_tokens=500
     )
 
     sql = response.choices[0].message.content.strip()
@@ -93,8 +93,7 @@ def preguntar_al_agente(pregunta):
             display(df)
 
             return
-
-        print("SQL Generado por el modelo:")
+        
         sql = text_to_sql(pregunta)
 
         if not sql.strip():
