@@ -1,3 +1,25 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS prestamo;
+DROP TABLE IF EXISTS ejemplar;
+DROP TABLE IF EXISTS sancion;
+DROP TABLE IF EXISTS socio;
+DROP TABLE IF EXISTS generoLibro;
+DROP TABLE IF EXISTS libroAutor;
+DROP TABLE IF EXISTS libro;
+DROP TABLE IF EXISTS auditoria_prestamos;
+DROP TABLE IF EXISTS editorial;
+DROP TABLE IF EXISTS estadoPrestamo;
+DROP TABLE IF EXISTS descripcionSancion;
+DROP TABLE IF EXISTS tipoSocio;
+DROP TABLE IF EXISTS tipoSancion;
+DROP TABLE IF EXISTS nacionalidad;
+DROP TABLE IF EXISTS genero;
+DROP TABLE IF EXISTS estadoFisico;
+DROP TABLE IF EXISTS autor;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 create table editorial (
     id_editorial INT primary key auto_increment,
     nombre varchar(100) unique key NOT NULL
@@ -126,7 +148,7 @@ create table prestamo (
     )
 );
 
-CREATE TABLE IF NOT EXISTS auditoria_prestamos (
+CREATE TABLE auditoria_prestamos (
     id_auditoria INT AUTO_INCREMENT PRIMARY KEY,
     id_prestamo INT,
     accion VARCHAR(10),            -- 'INSERT', 'UPDATE' o 'DELETE'

@@ -1,4 +1,13 @@
-delimiter $$
+DELIMITER $$
+
+DROP TRIGGER IF EXISTS trg_actualizar_stock_insert $$
+DROP TRIGGER IF EXISTS trg_actualizar_stock_update $$
+DROP TRIGGER IF EXISTS trg_audit_prestamo_delete $$
+DROP TRIGGER IF EXISTS trg_audit_prestamo_insert $$
+DROP TRIGGER IF EXISTS trg_audit_prestamo_update $$
+DROP TRIGGER IF EXISTS trg_estado_socio $$
+DROP TRIGGER IF EXISTS trg_prestamos_simultaneos $$
+
 -- 1. Controlar máximo 3 préstamos activos
 CREATE TRIGGER trg_prestamos_simultaneos 
 BEFORE INSERT ON prestamo 
@@ -107,4 +116,4 @@ BEGIN
     ); 
 END $$
 
-delimiter ;
+DELIMITER ;

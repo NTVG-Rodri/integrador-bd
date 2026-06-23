@@ -1,3 +1,12 @@
+DROP VIEW IF EXISTS vista_autores_populares;
+DROP VIEW IF EXISTS vista_catalogo_libros;
+DROP VIEW IF EXISTS vista_libros_populares;
+DROP VIEW IF EXISTS vista_prestamos_activos;
+DROP VIEW IF EXISTS vista_prestamos_activos_socio;
+DROP VIEW IF EXISTS vista_prestamos_vencidos;
+DROP VIEW IF EXISTS vista_sanciones_activas;
+DROP VIEW IF EXISTS vista_socios_activos;
+
 -- socios activos
 create view vista_socios_activos as
 select

@@ -7,23 +7,23 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
-TRUNCATE TABLE `auditoria_prestamos`;
-TRUNCATE TABLE `autor`;
-TRUNCATE TABLE `descripcionsancion`;
-TRUNCATE TABLE `editorial`;
-TRUNCATE TABLE `ejemplar`;
-TRUNCATE TABLE `estadofisico`;
-TRUNCATE TABLE `estadoprestamo`;
-TRUNCATE TABLE `genero`;
-TRUNCATE TABLE `generolibro`;
-TRUNCATE TABLE `libro`;
-TRUNCATE TABLE `libroautor`;
-TRUNCATE TABLE `nacionalidad`;
-TRUNCATE TABLE `prestamo`;
-TRUNCATE TABLE `sancion`;
-TRUNCATE TABLE `socio`;
-TRUNCATE TABLE `tiposancion`;
-TRUNCATE TABLE `tiposocio`;
+TRUNCATE TABLE prestamo;
+TRUNCATE TABLE ejemplar;
+TRUNCATE TABLE sancion;
+TRUNCATE TABLE socio;
+TRUNCATE TABLE generoLibro;
+TRUNCATE TABLE libroAutor;
+TRUNCATE TABLE libro;
+TRUNCATE TABLE auditoria_prestamos;
+TRUNCATE TABLE editorial;
+TRUNCATE TABLE estadoPrestamo;
+TRUNCATE TABLE descripcionSancion;
+TRUNCATE TABLE tipoSocio;
+TRUNCATE TABLE tipoSancion;
+TRUNCATE TABLE nacionalidad;
+TRUNCATE TABLE genero;
+TRUNCATE TABLE estadoFisico;
+TRUNCATE TABLE autor;
 
 -- ----------- editorial (20 filas) -----------
 INSERT INTO `editorial` (`id_editorial`, `nombre`) VALUES
