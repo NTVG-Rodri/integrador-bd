@@ -10,30 +10,31 @@ services:
       - GROQ_MODEL=${GROQ_MODEL}
     volumes:
       - .:/home/jovyan/work
-    depends_on:
-      - ollama
+    # depends_on:
+    #   - ollama
 
-  # Servidor Ollama
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
+  
+#   # Servidor Ollama
+#   ollama:
+#     image: ollama/ollama:latest
+#     ports:
+#       - "11434:11434"
+#     volumes:
+#       - ollama_data:/root/.ollama
 
-  # Descarga automática del modelo
-  ollama-init:
-    image: ollama/ollama:latest
-    depends_on:
-      - ollama
-    entrypoint: >
-      sh -c "
-      sleep 15 &&
-      ollama pull qwen3:8b
-      "
-    volumes:
-      - ollama_data:/root/.ollama
-    restart: "no"
+#   # Descarga automática del modelo
+#   ollama-init:
+#     image: ollama/ollama:latest
+#     depends_on:
+#       - ollama
+#     entrypoint: >
+#       sh -c "
+#       sleep 15 &&
+#       ollama pull qwen3:8b
+#       "
+#     volumes:
+#       - ollama_data:/root/.ollama
+#     restart: "no"
 
-volumes:
-  ollama_data:
+# volumes:
+#   ollama_data:
