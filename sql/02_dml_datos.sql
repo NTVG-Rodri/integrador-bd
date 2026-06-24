@@ -656,7 +656,7 @@ INSERT INTO `socio` (`id_socio`, `dni`, `nombre`, `apellido`, `email`, `fecha_al
   (199, '42663680', 'Manuel', 'Serville', 'manuel.serville@hotmail.com', '2024-05-15', NULL, 7, 4),
   (200, '27405761', 'Azhar', 'Rudyk', 'azhar.rudyk@outlook.com', '2004-06-18', NULL, 12, 2);
 INSERT INTO `socio` (`id_socio`, `dni`, `nombre`, `apellido`, `email`, `fecha_alta`, `fecha_baja`, `id_nacionalidad`, `id_tipoSocio`) VALUES
-  (201, '46151103', 'Emmanuel', 'Díaz', 'emmanueldiaz707@gmail.com', '2024-03-10', NULL, 1, 1);
+  (201, '46000000', 'Jira Fa', 'Mc Cuellolargo', 'camelopardalis@gmail.com', '2024-03-10', NULL, 1, 1);
 
 
 -- ----------- sancion (80 filas) -----------

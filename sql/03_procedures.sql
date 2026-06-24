@@ -4,6 +4,7 @@ DROP PROCEDURE IF EXISTS sp_generar_sancion $$
 DROP PROCEDURE IF EXISTS sp_registrar_devolucion $$
 DROP PROCEDURE IF EXISTS sp_registrar_prestamo $$
 DROP PROCEDURE IF EXISTS sp_renovar_prestamo $$
+DROP PROCEDURE IF EXISTS sp_reactivar_socio $$
 
 -- =========================================================
 -- 1. sp_registrar_prestamo(id_socio, id_ejemplar)
