@@ -146,9 +146,12 @@ def obtener_recomendaciones_ia(dni_o_id):
             historial = pd.read_sql(
                 text(query_historial),
                 conn,
-                params={"valor": dni_o_id}
+                params={"valor": int(dni_o_id)}
             )
+            print("Cantidad filas:", len(historial))
 
+
+            print(historial.head())
             if historial.empty:
                 return pd.DataFrame([
                     {
@@ -191,6 +194,9 @@ def obtener_recomendaciones_ia(dni_o_id):
               )
             LIMIT 15
             """
+            print("campo_busqueda =", campo_busqueda)
+            print("dni_o_id =", dni_o_id)
+            print(query_historial)
 
             candidatos = pd.read_sql(
                 text(query_candidatos),
@@ -198,84 +204,84 @@ def obtener_recomendaciones_ia(dni_o_id):
                 params={"valor": dni_o_id}
             )
 
-        if candidatos.empty:
-            return pd.DataFrame([
-                {
-                    "titulo": "",
-                    "autor": "",
-                    "genero": "",
-                    "motivo": "No se encontraron libros disponibles para recomendar."
-                }
-            ])
+            if candidatos.empty:
+                return pd.DataFrame([
+                    {
+                        "titulo": "",
+                        "autor": "",
+                        "genero": "",
+                        "motivo": "No se encontraron libros disponibles para recomendar."
+                    }
+                ])
 
-        # ==========================
-        # PROMPT PARA GROQ
-        # ==========================
-        prompt = f"""
-Sos un sistema inteligente de recomendación de libros de una biblioteca.
+            # ==========================
+            # PROMPT PARA GROQ
+            # ==========================
+            prompt = f"""
+            Sos un sistema inteligente de recomendación de libros de una biblioteca.
 
-Autores preferidos del socio:
-{", ".join(autores_leidos)}
+            Autores preferidos del socio:
+            {", ".join(autores_leidos)}
 
-Géneros preferidos del socio:
-{", ".join(generos_leidos)}
+            Géneros preferidos del socio:
+            {", ".join(generos_leidos)}
 
-Libros disponibles:
+            Libros disponibles:
 
-{candidatos.to_json(orient="records", force_ascii=False)}
+            {candidatos.to_json(orient="records", force_ascii=False)}
 
-TAREA:
+            TAREA:
 
-1. Elegí exactamente 3 libros.
-2. Utilizá únicamente libros de la lista proporcionada.
-3. No inventes títulos ni autores.
-4. Priorizá coincidencias con autores y géneros ya leídos.
-5. Respondé EXCLUSIVAMENTE en JSON válido.
-6. No agregues texto fuera del JSON.
+            1. Elegí exactamente 3 libros.
+            2. Utilizá únicamente libros de la lista proporcionada.
+            3. No inventes títulos ni autores.
+            4. Priorizá coincidencias con autores y géneros ya leídos.
+            5. Respondé EXCLUSIVAMENTE en JSON válido.
+            6. No agregues texto fuera del JSON.
 
-Formato esperado:
+            Formato esperado:
 
-[
-  {{
-    "titulo": "Título",
-    "autor": "Autor",
-    "genero": "Género",
-    "motivo": "Motivo de la recomendación"
-  }}
-]
-"""
+            [
+            {{
+                "titulo": "Título",
+                "autor": "Autor",
+                "genero": "Género",
+                "motivo": "Motivo de la recomendación"
+            }}
+            ]
+            """
 
-        response = client.chat.completions.create(
-            model=llm_model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "Sos un recomendador experto de libros. "
-                        "Respondé únicamente JSON válido."
-                    )
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            temperature=0.3,
-            max_tokens=800
-        )
+            response = client.chat.completions.create(
+                model=llm_model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "Sos un recomendador experto de libros. "
+                            "Respondé únicamente JSON válido."
+                        )
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.3,
+                max_tokens=300
+            )
 
-        contenido = response.choices[0].message.content.strip()
+            contenido = response.choices[0].message.content.strip()
 
-        contenido = (
-            contenido
-            .replace("```json", "")
-            .replace("```", "")
-            .strip()
-        )
+            contenido = (
+                contenido
+                .replace("```json", "")
+                .replace("```", "")
+                .strip()
+            )
 
-        recomendaciones = json.loads(contenido)
+            recomendaciones = json.loads(contenido)
 
-        return pd.DataFrame(recomendaciones)
+            return pd.DataFrame(recomendaciones)
 
     except json.JSONDecodeError:
         return pd.DataFrame([
