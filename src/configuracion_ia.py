@@ -148,10 +148,7 @@ def obtener_recomendaciones_ia(dni_o_id):
                 conn,
                 params={"valor": int(dni_o_id)}
             )
-            print("Cantidad filas:", len(historial))
 
-
-            print(historial.head())
             if historial.empty:
                 return pd.DataFrame([
                     {
@@ -194,9 +191,7 @@ def obtener_recomendaciones_ia(dni_o_id):
               )
             LIMIT 15
             """
-            print("campo_busqueda =", campo_busqueda)
-            print("dni_o_id =", dni_o_id)
-            print(query_historial)
+
 
             candidatos = pd.read_sql(
                 text(query_candidatos),
