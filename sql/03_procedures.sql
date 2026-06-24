@@ -18,9 +18,16 @@ BEGIN
     DECLARE v_stock_disp INT;
     DECLARE v_isbn VARCHAR(20);
     DECLARE v_sanciones_activas INT;
+    DECLARE v_ejemplar_en_uso INT;
 
     -- Validación 1: Socio activo y sin sanciones vigentes
     SELECT (fecha_baja IS NOT NULL) INTO v_inactivo FROM socio WHERE id_socio = p_id_socio;
+
+    IF v_inactivo IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: El socio no existe.';
+    END IF;
+
     SELECT COUNT(*) INTO v_sanciones_activas FROM sancion WHERE id_socio = p_id_socio AND fecha_fin >= CURDATE();
 
     IF v_inactivo = 1 OR v_sanciones_activas > 0 THEN
@@ -38,11 +45,24 @@ BEGIN
 
     -- Validación 3: Disponibilidad del ejemplar y stock
     SELECT isbn INTO v_isbn FROM ejemplar WHERE id_ejemplar = p_id_ejemplar;
+
+    IF v_isbn IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: El ejemplar no existe.';
+    END IF;
+
     SELECT stock_disponible INTO v_stock_disp FROM libro WHERE isbn = v_isbn;
 
     IF v_stock_disp <= 0 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Error: No hay stock disponible de este ejemplar.';
+        SET MESSAGE_TEXT = 'Error: No hay stock disponible de este libro.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_ejemplar_en_uso FROM prestamo WHERE id_ejemplar = p_id_ejemplar AND fecha_devolucion IS NULL;
+
+    IF v_ejemplar_en_uso > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: Este ejemplar no está disponible.';
     END IF;
 
     -- Registrar Préstamo
