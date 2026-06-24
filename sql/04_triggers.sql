@@ -58,7 +58,7 @@ CREATE TRIGGER trg_actualizar_stock_update
 AFTER UPDATE ON prestamo 
 FOR EACH ROW 
 BEGIN 
-    DECLARE var_isbn VARCHAR(200);
+    DECLARE var_isbn VARCHAR(20);
 
     SELECT isbn INTO var_isbn
     FROM ejemplar

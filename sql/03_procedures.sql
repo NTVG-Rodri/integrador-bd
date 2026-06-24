@@ -13,22 +13,23 @@ CREATE PROCEDURE sp_registrar_prestamo(
     IN p_id_ejemplar INT
 )
 BEGIN
-    DECLARE v_activo INT;
+    DECLARE v_inactivo INT;
     DECLARE v_cant_prestamos INT;
     DECLARE v_stock_disp INT;
     DECLARE v_isbn VARCHAR(20);
     DECLARE v_sanciones_activas INT;
 
-    -- Validación 1: Sanciones activas e integridad del socio
-    SELECT activo INTO v_activo FROM socio WHERE id_socio = p_id_socio;
+    -- Validación 1: Socio activo y sin sanciones vigentes
+    SELECT (fecha_baja IS NOT NULL) INTO v_inactivo FROM socio WHERE id_socio = p_id_socio;
     SELECT COUNT(*) INTO v_sanciones_activas FROM sancion WHERE id_socio = p_id_socio AND fecha_fin >= CURDATE();
-    
-    IF v_activo = 0 OR v_sanciones_activas > 0 THEN
+
+    IF v_inactivo = 1 OR v_sanciones_activas > 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Error: El socio tiene sanciones activas o está inactivo.';
     END IF;
 
-    -- Validación 2: Límite de préstamos (Supongamos un máximo de 3 activos por socio)
+    -- Validación 2: Límite de préstamos (máximo 3 activos por socio)
+    -- Nota: el trigger trg_prestamos_simultaneos también lo controla
     SELECT COUNT(*) INTO v_cant_prestamos FROM prestamo WHERE id_socio = p_id_socio AND fecha_devolucion IS NULL;
     IF v_cant_prestamos >= 3 THEN
         SIGNAL SQLSTATE '45000'
@@ -38,7 +39,7 @@ BEGIN
     -- Validación 3: Disponibilidad del ejemplar y stock
     SELECT isbn INTO v_isbn FROM ejemplar WHERE id_ejemplar = p_id_ejemplar;
     SELECT stock_disponible INTO v_stock_disp FROM libro WHERE isbn = v_isbn;
-    
+
     IF v_stock_disp <= 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Error: No hay stock disponible de este ejemplar.';
@@ -63,8 +64,8 @@ BEGIN
     DECLARE v_fecha_venc DATE;
     DECLARE v_dias_mora INT;
 
-    -- Obtener datos del préstamo
-    SELECT id_socio, fecha_vencimiento INTO v_id_socio, v_fecha_venc 
+    -- Obtener datos del préstamo activo
+    SELECT id_socio, fecha_vencimiento INTO v_id_socio, v_fecha_venc
     FROM prestamo WHERE id_prestamo = p_id_prestamo AND fecha_devolucion IS NULL;
 
     IF v_id_socio IS NULL THEN
@@ -73,14 +74,14 @@ BEGIN
     END IF;
 
     -- Asentar devolución
-    UPDATE prestamo 
-    SET fecha_devolucion = CURDATE(), id_estadoPrestamo = 2 
+    -- Nota: la actualización del stock la maneja trg_actualizar_stock_update
+    UPDATE prestamo
+    SET fecha_devolucion = CURDATE(), id_estadoPrestamo = 2
     WHERE id_prestamo = p_id_prestamo;
 
-    -- Si hay mora, llamamos automáticamente a sp_generar_sancion
+    -- Si hay mora, generar sanción automáticamente
     IF CURDATE() > v_fecha_venc THEN
-        SET v_dias_mora = DATEDIFF(CURDATE(), v_v_fecha_venc);
-        -- Pasamos id_socio, tipo_sancion (1) y los días calculados
+        SET v_dias_mora = DATEDIFF(CURDATE(), v_fecha_venc);
         CALL sp_generar_sancion(v_id_socio, 1, v_dias_mora);
     END IF;
 
@@ -97,16 +98,14 @@ CREATE PROCEDURE sp_generar_sancion(
 )
 BEGIN
     DECLARE v_dias_sancion INT;
-    
-    -- Supongamos que la sanción es el doble de los días de mora atrasados
+
+    -- La sanción dura el doble de los días de mora
     SET v_dias_sancion = p_dias_mora * 2;
 
-    -- Creamos el registro en la tabla sancion (id_descripcion = 1)
+    -- Insertar sanción (id_descripcion = 1)
+    -- Nota: el trigger trg_estado_socio se encarga de setear fecha_baja en socio automáticamente luego de este INSERT.
     INSERT INTO sancion (fecha_inicio, fecha_fin, id_descripcion, id_tipoSancion, id_socio)
     VALUES (CURDATE(), DATE_ADD(CURDATE(), INTERVAL v_dias_sancion DAY), 1, p_tipo, p_id_socio);
-
-    -- Actualizamos el estado del socio a inactivo
-    UPDATE socio SET activo = 0 WHERE id_socio = p_id_socio;
 END$$
 
 -- =========================================================
@@ -118,8 +117,9 @@ CREATE PROCEDURE sp_renovar_prestamo(
 BEGIN
     DECLARE v_id_socio INT;
     DECLARE v_sanciones INT;
-    -- Nota: Si implementan reservas agregan el control aquí, sino con el socio alcanza.
+    DECLARE v_inactivo INT;
 
+    -- Validar que el préstamo esté activo
     SELECT id_socio INTO v_id_socio FROM prestamo WHERE id_prestamo = p_id_prestamo AND fecha_devolucion IS NULL;
 
     IF v_id_socio IS NULL THEN
@@ -127,20 +127,42 @@ BEGIN
         SET MESSAGE_TEXT = 'Error: El préstamo no está activo y no se puede renovar.';
     END IF;
 
+    -- Validar que el socio esté activo (fecha_baja IS NULL)
+    SELECT (fecha_baja IS NOT NULL) INTO v_inactivo
+    FROM socio
+    WHERE id_socio = v_id_socio;
+
+    IF v_inactivo = 1 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: No se puede renovar. El socio no está activo.';
+    END IF;
+
     -- Validar que el socio no tenga sanciones vigentes
     SELECT COUNT(*) INTO v_sanciones FROM sancion WHERE id_socio = v_id_socio AND fecha_fin >= CURDATE();
-    
+
     IF v_sanciones > 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Error: No se puede renovar. El socio cuenta con sanciones vigentes.';
     END IF;
 
     -- Extender la fecha de vencimiento por 14 días más a partir de hoy
-    UPDATE prestamo 
+    UPDATE prestamo
     SET fecha_vencimiento = DATE_ADD(CURDATE(), INTERVAL 14 DAY)
     WHERE id_prestamo = p_id_prestamo;
 
     SELECT 'Préstamo renovado con éxito.' AS resultado;
+END$$
+
+-- =========================================================
+-- sp_reactivar_socio(p_id_socio) 
+-- Reactiva el socio si no tiene sanciones vigentes
+-- =========================================================
+CREATE PROCEDURE sp_reactivar_socio(IN p_id_socio INT)
+BEGIN
+    IF (SELECT COUNT(*) FROM sancion 
+        WHERE id_socio = p_id_socio AND fecha_fin >= CURDATE()) = 0 THEN
+        UPDATE socio SET fecha_baja = NULL WHERE id_socio = p_id_socio;
+    END IF;
 END$$
 
 DELIMITER ;
